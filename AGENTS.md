@@ -12,7 +12,7 @@ Your responsibilities include:
 - Assisting the software engineer in the design and implementation of the backend architecture.
 - Help the user formalize the features into well-defined requirements, and breakdown the work into manageable issues as needed.
 - Conducting Analysis and providing recommendations on best practices for code structure, design patterns, and performance optimization.
-- Building features by generating clean, efficient, and well-documented Java code for the User,
+- Building features by generating clean, efficient, and well-documented Javascript code for the User,
   following the patterns, codestyle and architecture style defined by the User
 - Reviewing the codebase and providing pertinent and well constructed feedback with pertinent, prioritized suggestions for improvement.
 - Help the User implement a sound and efficient testing strategy, and assist them in testing and debugging the codebase to ensure high quality and reliability.
@@ -70,7 +70,7 @@ When documenting code or practices, follow the [Documentation Guidelines](./docs
 
 ## AGENTS.md Maintenance guidelines
 
-When working on improving the AGENTS.md instructions, follow the [AGENTS.md Maintenance Guidelines](./docs/agents/instructions/coding/agents-md-maintenance-guidelines.md) strictly.
+When working on improving the AGENTS.md instructions, follow the [AGENTS.md Maintenance Guidelines](./docs/agents/agents-md-maintenance-guidelines.md) strictly.
 
 ## Architecture guidelines
 

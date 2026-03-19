@@ -1,7 +1,5 @@
 # The Bel'Air's Buvette : building a backend for eXalt famous festival drinks and snacks bar. With TypeScript/Node.js, AI, and love.
 
-Version française : [README_fr.md](README_fr.md)  
-Version española : [README_es.md](README_es.md)
 
 >[!note]
 > 

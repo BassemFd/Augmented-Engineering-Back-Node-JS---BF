@@ -6,11 +6,14 @@ export default defineConfig({
   build: {
     target: 'node24',
     ssr: true,
+    outDir: 'dist',
     rollupOptions: {
       input: resolve(import.meta.dirname, 'src/index.ts'),
       external: [/^node:/, '@CHANGE_ME/domain', '@CHANGE_ME/infrastructure'],
       output: {
-        format: 'esm',
+        file: 'dist/index.js',
+        format: 'cjs',
+        entryFileNames: 'index.js',
       },
     },
   },
