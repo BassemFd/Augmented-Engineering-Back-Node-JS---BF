@@ -55,7 +55,7 @@ _For any question or suggestion to improve these guidelines, submit a PR or cont
     - Coverage of critical and edge cases.
 
 7. **Documentation**
-    - Update comments, README, and technical documentation if needed.
+    - Update comments, README, and technical documentation if needed. [See documentation guidelines](./documentation-guidelines.md)
 
 8. **Constructive feedback**
     - Give clear, kind, and well-argued feedback.
