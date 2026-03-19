@@ -6,3 +6,5 @@
 export const logWelcomeMessage = (): void => {
 	console.log("Hello from Belair's Buvette backend!");
 };
+
+logWelcomeMessage();

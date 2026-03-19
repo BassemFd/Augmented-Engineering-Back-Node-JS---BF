@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: [/^node:/, '@CHANGE_ME/domain'],
+      external: [/^node:/, '@belairs-buvette/domain'],
     },
   },
   test: {

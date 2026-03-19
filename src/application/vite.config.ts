@@ -9,10 +9,10 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: resolve(import.meta.dirname, 'src/index.ts'),
-      external: [/^node:/, '@CHANGE_ME/domain', '@CHANGE_ME/infrastructure'],
+      external: [/^node:/, '@belairs-buvette/domain', '@belairs-buvette/infrastructure'],
       output: {
-        file: 'dist/index.js',
-        format: 'cjs',
+        dir: 'dist',
+        format: 'es',
         entryFileNames: 'index.js',
       },
     },
