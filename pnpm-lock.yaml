@@ -24,6 +24,23 @@ importers:
         specifier: ^3.0.0
         version: 3.2.4(@types/node@24.12.0)
 
+  src/application:
+    dependencies:
+      '@belairs-buvette/domain':
+        specifier: workspace:*
+        version: link:../domain
+      '@belairs-buvette/infrastructure':
+        specifier: workspace:*
+        version: link:../infrastructure
+
+  src/domain: {}
+
+  src/infrastructure:
+    dependencies:
+      '@belairs-buvette/domain':
+        specifier: workspace:*
+        version: link:../domain
+
 packages:
 
   '@cspotcode/source-map-support@0.8.1':
