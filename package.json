@@ -11,6 +11,8 @@
     "pnpm": ">=9.0.0"
   },
   "devDependencies": {
+    "@playwright/cli": "^0.1.1",
+    "@playwright/test": "^1.58.2",
     "@types/node": "^24.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.0",
