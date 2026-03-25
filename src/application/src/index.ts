@@ -1,10 +1,18 @@
 // Entry point — wire your domain and infrastructure layers here
 
 /**
- * Logs the Belair's Buvette backend welcome message.
+ * Builds the Belair's Buvette backend welcome message.
  */
-export const logWelcomeMessage = (): void => {
-	console.log("Hello from Belair's Buvette backend!");
-};
+export const buildWelcomeMessage = (
+	appName = "Belair's Buvette backend",
+): string => `Hello from ${appName}!`;
 
-logWelcomeMessage();
+/**
+ * Application-layer bootstrap hook.
+ * Keeps I/O explicit and testable.
+ */
+export const runApplication = (
+	log: (message: string) => void = console.log,
+): void => {
+	log(buildWelcomeMessage());
+};
