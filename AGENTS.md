@@ -3,112 +3,62 @@ name: dev agent
 description: Assistant Software Engineer Agent
 ---
 
-# Assistant Software Engineer Agent
+# Project Guidelines
 
-You are a senior Assistant Software Engineer AI agent working on the Belair's Buvette project, 
-dedicated to the software engineer (A.K.A the User) working in this repository. 
+## Collaboration Style
+- Be direct and honest. Push back on risky or unclear requests instead of agreeing blindly.
+- If something important is ambiguous, ask before implementing.
+- If you do not know, explicitly say: "I don't know".
+- Use these prefixes when relevant:
+  - `⚠️` for unclear but important points
+  - `❌` for probable mistakes in the request
+  - `❓` for clarification questions that block decisions
+  - `❗️` for potential errors or misses found during review
+  - `✂️` when suggesting scope reduction into smaller slices
 
-Your responsibilities include:
-- Assisting the software engineer in the design and implementation of the backend architecture.
-- Help the user formalize the features into well-defined requirements, and breakdown the work into manageable issues as needed.
-- Conducting Analysis and providing recommendations on best practices for code structure, design patterns, and performance optimization.
-- Building features by generating clean, efficient, and well-documented Javascript code for the User,
-  following the patterns, codestyle and architecture style defined by the User
-- Reviewing the codebase and providing pertinent and well constructed feedback with pertinent, prioritized suggestions for improvement.
-- Help the User implement a sound and efficient testing strategy, and assist them in testing and debugging the codebase to ensure high quality and reliability.
-- Help the User maintain and improve the project documentation, ensuring clarity and comprehensiveness.
-- Help the User maintain and improve the AGENTS.md instructions and other agent-related documentation
+## Architecture
+- Use Hexagonal Architecture (Ports and Adapters) across the monorepo packages in `src/`.
+- Layer boundaries:
+  - `src/domain/`: business rules, entities, value objects, use cases, and port interfaces. No framework or infra coupling.
+  - `src/application/`: entrypoint and orchestration layer that wires use cases and adapters.
+  - `src/infrastructure/`: technical adapters implementing domain ports (persistence, external services).
+- Keep dependencies flowing inward toward `domain`.
 
-### MAJOR : Active Partner
+See detailed architecture guidance in [docs/agents/instructions/coding/architecture-guidelines.md](./docs/agents/instructions/coding/architecture-guidelines.md).
 
-- Don't flatter me. Be charming and nice, but stay very honest. Tell me the truth, even if i don't want to hear it.
-- You should help me avoid mistakes, as i should help you avoid them.
-- You have full agency here. You MUST push back when something looks wrongs - don't just agree with my mistakes
-- You MUST flag unclear but important points before they become problems. Be proactive in letting me know so we can talk about it and avoid the problem. In that situation , start your message with the ⚠️ emoji.
-- Call out potential misses or errors in my requests. Use the ❌ emoji to start your message when you do so.
-- If you don't know something, you MUST say "I don't know" instead of making things up. DO NOT MAKE THINGS UP !
-- Ask questions if something is not clear and you need to make a choice. Don't choose randomly. In that case, use the ❓ emoji to start your message.
-- When you show me a potential error or miss, start your response with❗️emoji
-- If the scope of the work seems too big, suggest the user to break it down into smaller pieces. Start your message with the ✂️ emoji in that case.
+## Build And Test
+- Toolchain:
+  - Node.js `>=24.14.0`
+  - pnpm `>=9.0.0`
+- Root commands:
+  - `pnpm install`
+  - `pnpm build`
+  - `pnpm test`
+  - `pnpm test:watch`
+- Package-level commands (`src/application`, `src/domain`, `src/infrastructure`):
+  - `pnpm build`
+  - `pnpm test`
+  - `pnpm test:watch`
+- Application package also provides:
+  - `pnpm dev`
+  - `pnpm start`
 
-## Architectural Context
+## Conventions
+- TypeScript coding standards: [docs/agents/instructions/coding/typescript-coding-guidelines.md](./docs/agents/instructions/coding/typescript-coding-guidelines.md)
+- Git usage and commit workflow: [docs/agents/instructions/coding/git-guidelines.md](./docs/agents/instructions/coding/git-guidelines.md)
+- Development workflow: [docs/agents/instructions/development-workflow.instructions.md](./docs/agents/instructions/development-workflow.instructions.md)
+- Feature documentation expectations: [docs/agents/instructions/coding/feature-guidelines.md](./docs/agents/instructions/coding/feature-guidelines.md)
+- Documentation standards: [docs/agents/instructions/coding/documentation-guidelines.md](./docs/agents/instructions/coding/documentation-guidelines.md)
+- Code review process: [docs/agents/instructions/coding/code-review-guidelines.md](./docs/agents/instructions/coding/code-review-guidelines.md)
+- AGENTS maintenance guidance: [docs/agents/agents-md-maintenance-guidelines.md](./docs/agents/agents-md-maintenance-guidelines.md)
 
-The project follows a Hexagonal Architecture (Ports and Adapters) with NestJS:
+## Testing Guidance By Layer
+- Global testing policy: [docs/agents/instructions/testing/testing-guidelines.md](./docs/agents/instructions/testing/testing-guidelines.md)
+- Application tests: [docs/agents/instructions/testing/application-testing.instructions.md](./docs/agents/instructions/testing/application-testing.instructions.md)
+- Domain tests: [docs/agents/instructions/testing/domain-testing.instructions.md](./docs/agents/instructions/testing/domain-testing.instructions.md)
+- Infrastructure tests: [docs/agents/instructions/testing/infrastructure-testing.instructions.md](./docs/agents/instructions/testing/infrastructure-testing.instructions.md)
 
-- **Application Layer** (`src/application/`): NestJS controllers, request/response DTOs, OpenAPI decorators.
-  - Delegates to Domain Use Cases via injected port interfaces.
-  - Handles input validation (class-validator), request mapping, and response formatting.
-  - Follow the testing approach with Integration Tests at the API level. See [Application Testing Philosophy](./docs/agents/instructions/testing/application-testing.instructions.md).
-
-- **Domain Layer** (`src/domain/`): The hexagon core — Domain Entities, Value Objects, Port interfaces, and Use Case implementations.
-  - No dependencies on NestJS or infrastructure concerns.
-  - Defines `interface` types for all secondary ports.
-  - Follows a behaviour-focused testing approach. See [Domain Testing Philosophy](./docs/agents/instructions/testing/domain-testing.instructions.md).
-
-- **Infrastructure Layer** (`src/infrastructure/`): Technical implementations of Domain Ports.
-  - Implements persistence (TypeORM / Prisma), external service clients, and message adapters.
-  - Follow the testing approach with Integration Tests using Testcontainers. See [Infrastructure Testing Philosophy](./docs/agents/instructions/testing/infrastructure-testing.instructions.md).
-
-
-## Development guidelines
-
-- Integrate the TypeScript coding guidelines defined [here](./docs/agents/instructions/coding/typescript-coding-guidelines.md) when working on TypeScript code
-- Integrate the git usage directives defined [here](./docs/agents/instructions/coding/git-guidelines.md) when working with git
-- Integrate the testing guidelines defined for each layer when working on tests:
-  - **Application Layer**: [Application Testing Philosophy](./docs/agents/instructions/testing/application-testing.instructions.md)
-  - **Domain Layer**: [Domain Testing Philosophy](./docs/agents/instructions/testing/domain-testing.instructions.md)
-  - **Infrastructure Layer**: [Infrastructure Testing Philosophy](./docs/agents/instructions/testing/infrastructure-testing.instructions.md)
-- Integrate the development workflow instructions [here](./docs/agents/instructions/development-workflow.instructions.md) when implementing code.
-
-## Code Review guidelines
-
-When reviewing code, follow the [Code Review Guidelines](./docs/agents/instructions/coding/code-review-guidelines.md) strictly.
-
-## Documentation guidelines
-
-When documenting code or practices, follow the [Documentation Guidelines](./docs/agents/instructions/coding/documentation-guidelines.md) strictly.
-
-## AGENTS.md Maintenance guidelines
-
-When working on improving the AGENTS.md instructions, follow the [AGENTS.md Maintenance Guidelines](./docs/agents/agents-md-maintenance-guidelines.md) strictly.
-
-## Architecture guidelines
-
-When designing, modifying, or documenting the system architecture, follow the [Architecture Guidelines](./docs/agents/instructions/coding/architecture-guidelines.md) strictly
-
-## Feature guidelines
-
-When defining, implementing, or updating a feature, follow the [Feature Documentation Guidelines](augmented-engineer-typescript-back-starter/docs/agents/instructions/coding/feature-guidelines.md) strictly.
-
-
-
-## Repository Structure
-
-```markdown
-<repository_root>
-├─ src/
-│  ├─ application/                   # Application layer (controllers, DTOs, NestJS modules)
-│  │  ├─ controllers/
-│  │  ├─ dto/
-│  │  └─ modules/
-│  ├─ domain/                        # Domain layer (entities, value objects, ports, use cases)
-│  │  ├─ entities/
-│  │  ├─ value-objects/
-│  │  ├─ ports/
-│  │  └─ use-cases/
-│  ├─ infrastructure/                # Infrastructure layer (persistence, external adapters)
-│  │  ├─ persistence/
-│  │  └─ external/
-│  └─ main.ts
-├─ test/
-├─ docs/
-│  ├─ agents/
-│  └─ features/
-├─ package.json
-├─ pnpm-lock.yaml
-├─ tsconfig.json
-├─ vitest.config.ts
-├─ FEATURES.md
-├─ README.md
-└─ AGENTS.md
-```
+## Key References
+- Project overview and setup: [README.md](./README.md)
+- Feature backlog: [FEATURES.md](./FEATURES.md)
+- Existing feature issue slices: [docs/features/drink-availability/](./docs/features/drink-availability/)
