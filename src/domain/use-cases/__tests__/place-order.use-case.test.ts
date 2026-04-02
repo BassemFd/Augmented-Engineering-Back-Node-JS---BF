@@ -1,37 +1,14 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { PlaceOrderUseCase, ProductRepository, OrderRepository, OrderItem, Product, Order } from '../place-order.use-case';
 
-// Minimal in-test mock of the production use case to satisfy this single test (TDD Green)
-vi.mock('../place-order.use-case', () => {
-  return {
-    PlaceOrderUseCase: class {
-      orderRepo: any;
-      productRepo: any;
-      constructor(orderRepo: any, productRepo: any) {
-        this.orderRepo = orderRepo;
-        this.productRepo = productRepo;
-      }
-      async execute({ customerId, items }: any) {
-        const item = items[0];
-        const product = this.productRepo.findByName(item.productName);
-        if (!product) throw new Error('product not found');
-        this.productRepo.decreaseStock(product.id, item.quantity);
-        const saved = this.orderRepo.save({ customerId, items, status: 'EN_ATTENTE' });
-        return { orderId: saved.id, status: 'EN_ATTENTE' };
-      }
-    },
-  };
-});
+class FakeProductRepository implements ProductRepository {
+  private products = new Map<string, Product>();
 
-let PlaceOrderUseCase: any;
-
-class FakeProductRepository {
-  private products = new Map<string, any>();
-
-  add(product: any) {
+  add(product: Product) {
     this.products.set(product.id, product);
   }
 
-  findByName(name: string) {
+  findByName(name: string): Product | null {
     for (const p of this.products.values()) {
       if (p.name === name) return p;
     }
@@ -46,10 +23,10 @@ class FakeProductRepository {
   }
 }
 
-class FakeOrderRepository {
-  private orders: any[] = [];
+class FakeOrderRepository implements OrderRepository {
+  private orders: Order[] = [];
 
-  save(order: any) {
+  save(order: Order) {
     order.id = `order-${this.orders.length + 1}`;
     this.orders.push(order);
     return order;
@@ -59,14 +36,13 @@ class FakeOrderRepository {
 describe('PlaceOrderUseCase', () => {
   let fakeProductRepository: FakeProductRepository;
   let fakeOrderRepository: FakeOrderRepository;
-  let useCase: any;
+  let useCase: PlaceOrderUseCase;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     fakeProductRepository = new FakeProductRepository();
     fakeOrderRepository = new FakeOrderRepository();
-    const mod = await import('../place-order.use-case');
-    PlaceOrderUseCase = mod.PlaceOrderUseCase;
-    useCase = new PlaceOrderUseCase(fakeOrderRepository as any, fakeProductRepository as any);
+    // use the real production class
+    useCase = new PlaceOrderUseCase(fakeOrderRepository, fakeProductRepository);
   });
 
   it('given an identified customer and a Mojito in stock, when placing an order for 1 Mojito, then order is created with status EN_ATTENTE and an id is returned', async () => {

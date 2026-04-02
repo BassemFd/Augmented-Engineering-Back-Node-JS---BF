@@ -30,6 +30,10 @@ See detailed architecture guidance in [docs/agents/instructions/coding/architect
 - Toolchain:
   - Node.js `>=24.14.0`
   - pnpm `>=9.0.0`
+- Session bootstrap (agent requirement):
+  - Before running any Node.js/pnpm command, check if `.nvmrc` exists at repository root.
+  - If `.nvmrc` exists, run `nvm use` first in the current shell session.
+  - If `nvm` is unavailable, stop and report the environment issue instead of continuing with Node.js/pnpm commands.
 - Root commands:
   - `pnpm install`
   - `pnpm build`
