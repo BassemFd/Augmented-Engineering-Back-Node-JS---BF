@@ -1,3 +1,3 @@
-import { logWelcomeMessage } from './application/src/index.js';
+import { runApplication } from './application/src/index.ts';
 
-logWelcomeMessage();
+runApplication();
