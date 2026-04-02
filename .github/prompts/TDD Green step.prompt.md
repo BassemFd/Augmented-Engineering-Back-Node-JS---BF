@@ -43,12 +43,22 @@ Exemple d'input:
 - **NE PAS** modifier le code de production (use case, services, adapters, etc.).
 - Garder les types TypeScript corrects (pas de `any`).
 
+CRITICAL:
+- L'agent **ne doit jamais** créer ou modifier des fichiers de production pour atteindre le Green. Si un fichier de production est créé ou modifié, la sortie doit être `status: "failed"`.
+- L'agent **doit** boucler et corriger de manière itérative jusqu'à obtenir un test vert (ne pas s'arrêter sur un échec intermittent).
+- La sortie finale **doit** être un JSON strict conforme au format demandé; fournir un exemple si nécessaire.
+
 ## Exemples negatifs (interdits)
 - Interdit: modifier `src/domain/use-cases/place-order.use-case.ts` pour faire passer le test.
 - Interdit: changer l'assertion du test cible pour le rendre plus facile a faire passer.
 - Interdit: corriger un autre test du meme fichier "au passage".
 - Interdit: ajouter des comportements non verifies par `test_name`.
 - Interdit: repondre en texte libre au lieu d'un JSON strictement conforme.
+
+Exemples CRITIQUES (si violés, échouer immédiatement):
+- Créer/modifier un fichier sous `src/` ou `src/domain/` pour faire passer le test.
+- Modifier le contenu du bloc `it(...)` ciblé.
+- Retourner une sortie non-JSON ou JSON invalide.
 
 ## Exemples
 
@@ -164,6 +174,19 @@ Répondre **uniquement** avec un JSON valide conforme à cette structure:
     "ready_for_refactor": "boolean",
     "notes": "string"
   }
+}
+```
+
+Exemple concret de sortie minimale acceptée:
+
+```json
+{
+  "status": "passed",
+  "test": { "file": "src/domain/use-cases/__tests__/place-order.use-case.test.ts", "name": "given an identified customer and a Mojito in stock, when placing an order for 1 Mojito, then order is created with status EN_ATTENTE and an id is returned" },
+  "changes": [],
+  "constraints": { "production_code_modified": false, "target_test_modified": false, "other_tests_modified": false, "extra_features_added": false },
+  "verification": { "command": "pnpm vitest run <file> -t \"<test_name>\"", "result": "pass" },
+  "handoff": { "ready_for_refactor": true, "notes": "" }
 }
 ```
 
