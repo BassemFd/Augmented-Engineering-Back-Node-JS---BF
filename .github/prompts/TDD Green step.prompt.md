@@ -10,9 +10,9 @@ model: GPT-5 mini (copilot)
 # Green TDD step prompt
 
 ## Principes directeurs
-- TDD as if you meant it: à l'etape Green, l'agent doit rester focalise sur le test cible et ne jamais ouvrir la porte a une implementation de production.
-- La sortie structuree est obligatoire pour enchaîner proprement vers l'etape Refactor.
-- Les exemples negatifs sont prioritaires pour contraindre le comportement (quoi ne PAS faire).
+- TDD as if you meant it : à l'étape Green, l'agent doit rester focalisé sur le test cible et ne jamais ouvrir la porte à une implémentation de production.
+- La sortie structurée est obligatoire pour enchaîner proprement vers l'étape Refactor.
+- Les exemples négatifs sont prioritaires pour contraindre le comportement (quoi ne PAS faire).
 
 ## Objectif
 Faire passer exactement **un** test provenant de l'étape Red en implémentant le minimum nécessaire, uniquement dans la classe de test, puis vérifier le résultat.
@@ -48,12 +48,12 @@ CRITICAL:
 - L'agent **doit** boucler et corriger de manière itérative jusqu'à obtenir un test vert (ne pas s'arrêter sur un échec intermittent).
 - La sortie finale **doit** être un JSON strict conforme au format demandé; fournir un exemple si nécessaire.
 
-## Exemples negatifs (interdits)
-- Interdit: modifier `src/domain/use-cases/place-order.use-case.ts` pour faire passer le test.
-- Interdit: changer l'assertion du test cible pour le rendre plus facile a faire passer.
-- Interdit: corriger un autre test du meme fichier "au passage".
-- Interdit: ajouter des comportements non verifies par `test_name`.
-- Interdit: repondre en texte libre au lieu d'un JSON strictement conforme.
+## Exemples négatifs (interdits)
+- Interdit : modifier `src/domain/use-cases/place-order.use-case.ts` pour faire passer le test.
+- Interdit : changer l'assertion du test cible pour le rendre plus facile à faire passer.
+- Interdit : corriger un autre test du même fichier "au passage".
+- Interdit : ajouter des comportements non vérifiés par `test_name`.
+- Interdit : répondre en texte libre au lieu d'un JSON strictement conforme.
 
 Exemples CRITIQUES (si violés, échouer immédiatement):
 - Créer/modifier un fichier sous `src/` ou `src/domain/` pour faire passer le test.
@@ -190,8 +190,8 @@ Exemple concret de sortie minimale acceptée:
 }
 ```
 
-## Critere d'acceptation Green
-- Si `production_code_modified` est `true`, la sortie doit etre `status: "failed"`.
-- Si `target_test_modified` est `true`, la sortie doit etre `status: "failed"`.
-- Si `other_tests_modified` est `true`, la sortie doit etre `status: "failed"`.
-- Si la verification ne passe pas, la sortie doit etre `status: "failed"` et inclure `verification.failing_reason`.
+## Critère d'acceptation Green
+- Si `production_code_modified` est `true`, la sortie doit être `status: "failed"`.
+- Si `target_test_modified` est `true`, la sortie doit être `status: "failed"`.
+- Si `other_tests_modified` est `true`, la sortie doit être `status: "failed"`.
+- Si la vérification ne passe pas, la sortie doit être `status: "failed"` et inclure `verification.failing_reason`.
