@@ -24,6 +24,7 @@ class FakeCreerCommandeUseCase implements CreerCommandeUseCase {
 }
 
 describe('POST /commandes', () => {
+  
   it('returns 201 and the created command id with status EN_ATTENTE', async () => {
     const useCase = new FakeCreerCommandeUseCase();
     const router = createApplicationRouter({ creerCommandeUseCase: useCase });
@@ -88,5 +89,31 @@ describe('POST /commandes', () => {
     expect(response.body).toEqual({
       error: 'Not Found',
     });
+  });
+
+  it('requête refusée si le festivalier n\'est pas authentifié', async () => {
+    const useCase = new FakeCreerCommandeUseCase();
+    const router = createApplicationRouter({
+      creerCommandeUseCase: useCase,
+      authenticate: (request: HttpRequest) => {
+        const body = request.body as { festivalierId?: unknown } | undefined;
+        return !(body && body.festivalierId === 'festivalier-42');
+      },
+    });
+
+    const request: HttpRequest = {
+      method: 'POST',
+      path: '/commandes',
+      // Simulate an unauthenticated request by omitting any auth context
+      body: {
+        festivalierId: 'festivalier-42',
+        articles: [{ articleId: 'mojito', quantite: 2 }],
+      },
+    };
+
+    const response = await router.handle(request);
+
+    // RED: we expect 401 for unauthenticated requests — this should fail until auth is implemented
+    expect(response.statusCode).toBe(401);
   });
 });
