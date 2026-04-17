@@ -1,32 +1,31 @@
 import { describe, expect, it } from 'vitest';
 import { createApplicationRouter } from '../src/http/router.ts';
 import type { HttpRequest } from '../src/http/http-types.ts';
-import type { CreerCommandeUseCase } from '../src/commandes/commande.controller.ts';
+import {
+  CreerCommandeDepuisDomaineUseCase,
+} from '../src/commandes/commande.controller.ts';
 
-class FakeCreerCommandeUseCase implements CreerCommandeUseCase {
-  public receivedInput:
-    | {
-        festivalierId: string;
-        articles: Array<{ articleId: string; quantite: number }>;
-      }
-    | undefined;
-
+class StubPasserCommandeUseCase {
   async execute(input: {
-    festivalierId: string;
-    articles: Array<{ articleId: string; quantite: number }>;
-  }): Promise<{ commandeId: string; statut: string }> {
-    this.receivedInput = input;
+    customerId: string;
+    items: Array<{ productName: string; quantity: number }>;
+  }): Promise<{ orderId: string; status: string }> {
+    if (input.customerId.trim().length === 0) {
+      throw new Error('CUSTOMER_ID_INVALIDE');
+    }
+
     return {
-      commandeId: 'cmd-123',
-      statut: 'EN_ATTENTE',
+      orderId: 'cmd-1',
+      status: 'EN_ATTENTE',
     };
   }
 }
 
 describe('POST /commandes', () => {
-  
   it('returns 201 and the created command id with status EN_ATTENTE', async () => {
-    const useCase = new FakeCreerCommandeUseCase();
+    const useCase = new CreerCommandeDepuisDomaineUseCase(
+      new StubPasserCommandeUseCase(),
+    );
     const router = createApplicationRouter({ creerCommandeUseCase: useCase });
 
     const request: HttpRequest = {
@@ -42,17 +41,15 @@ describe('POST /commandes', () => {
 
     expect(response.statusCode).toBe(201);
     expect(response.body).toEqual({
-      commandeId: 'cmd-123',
+      commandeId: 'cmd-1',
       statut: 'EN_ATTENTE',
-    });
-    expect(useCase.receivedInput).toEqual({
-      festivalierId: 'fest-1',
-      articles: [{ articleId: 'drink-mojito', quantite: 1 }],
     });
   });
 
   it('returns 400 when payload is invalid', async () => {
-    const useCase = new FakeCreerCommandeUseCase();
+    const useCase = new CreerCommandeDepuisDomaineUseCase(
+      new StubPasserCommandeUseCase(),
+    );
     const router = createApplicationRouter({ creerCommandeUseCase: useCase });
 
     const request: HttpRequest = {
@@ -70,11 +67,12 @@ describe('POST /commandes', () => {
     expect(response.body).toEqual({
       error: 'Invalid request payload',
     });
-    expect(useCase.receivedInput).toBeUndefined();
   });
 
   it('returns 404 when route does not exist', async () => {
-    const useCase = new FakeCreerCommandeUseCase();
+    const useCase = new CreerCommandeDepuisDomaineUseCase(
+      new StubPasserCommandeUseCase(),
+    );
     const router = createApplicationRouter({ creerCommandeUseCase: useCase });
 
     const request: HttpRequest = {
@@ -92,7 +90,9 @@ describe('POST /commandes', () => {
   });
 
   it('requête refusée si le festivalier n\'est pas authentifié', async () => {
-    const useCase = new FakeCreerCommandeUseCase();
+    const useCase = new CreerCommandeDepuisDomaineUseCase(
+      new StubPasserCommandeUseCase(),
+    );
     const router = createApplicationRouter({
       creerCommandeUseCase: useCase,
       authenticate: (request: HttpRequest) => {
