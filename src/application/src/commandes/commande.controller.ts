@@ -4,11 +4,40 @@ import type {
   CreerCommandeResponse,
 } from './creer-commande.dto.ts';
 
+type PasserCommandePort = {
+  execute(input: {
+    customerId: string;
+    items: Array<{ productName: string; quantity: number }>;
+  }): Promise<{ orderId: string; status: string }>;
+};
+
 export interface CreerCommandeUseCase {
   execute(input: {
     festivalierId: string;
     articles: Array<{ articleId: string; quantite: number }>;
   }): Promise<CreerCommandeResponse>;
+}
+
+export class CreerCommandeDepuisDomaineUseCase implements CreerCommandeUseCase {
+  public constructor(private readonly passerCommandeUseCase: PasserCommandePort) {}
+
+  public async execute(input: {
+    festivalierId: string;
+    articles: Array<{ articleId: string; quantite: number }>;
+  }): Promise<CreerCommandeResponse> {
+    const result = await this.passerCommandeUseCase.execute({
+      customerId: input.festivalierId,
+      items: input.articles.map((article) => ({
+        productName: article.articleId,
+        quantity: article.quantite,
+      })),
+    });
+
+    return {
+      commandeId: result.orderId,
+      statut: result.status,
+    };
+  }
 }
 
 export class CommandesController {
