@@ -4,6 +4,11 @@ import type { HttpRequest } from '../src/http/http-types.ts';
 import {
   CreerCommandeDepuisDomaineUseCase,
 } from '../src/commandes/commande.controller.ts';
+import { PasserCommandeUseCase } from '@belairs-buvette/domain/src/use-cases/place-order.use-case.ts';
+import {
+  InMemoryCommandeRepository,
+  InMemoryStockRepository,
+} from '@belairs-buvette/infrastructure/src/index.ts';
 
 class StubPasserCommandeUseCase {
   async execute(input: {
@@ -22,10 +27,21 @@ class StubPasserCommandeUseCase {
 }
 
 describe('POST /commandes', () => {
-  it('returns 201 and the created command id with status EN_ATTENTE', async () => {
-    const useCase = new CreerCommandeDepuisDomaineUseCase(
-      new StubPasserCommandeUseCase(),
+  it('returns 201 and the created command id with status EN_ATTENTE (API -> Domain -> Infrastructure)', async () => {
+    const orderRepository = new InMemoryCommandeRepository();
+    const stockRepository = new InMemoryStockRepository([
+      {
+        id: 'stock-1',
+        name: 'drink-mojito',
+        stock: 10,
+        price: 12,
+      },
+    ]);
+    const passerCommandeUseCase = new PasserCommandeUseCase(
+      orderRepository,
+      stockRepository,
     );
+    const useCase = new CreerCommandeDepuisDomaineUseCase(passerCommandeUseCase);
     const router = createApplicationRouter({ creerCommandeUseCase: useCase });
 
     const request: HttpRequest = {
@@ -44,6 +60,11 @@ describe('POST /commandes', () => {
       commandeId: 'cmd-1',
       statut: 'EN_ATTENTE',
     });
+
+    const stored = orderRepository.findById('cmd-1');
+    expect(stored).not.toBeNull();
+    expect(stored?.customerId).toBe('fest-1');
+    expect(stored?.status).toBe('EN_ATTENTE');
   });
 
   it('returns 400 when payload is invalid', async () => {

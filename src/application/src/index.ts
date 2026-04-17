@@ -1,6 +1,12 @@
 // Entry point — wire your domain and infrastructure layers here
 import { createApplicationRouter } from './http/router.ts';
 import type { HttpRequest, HttpResponse } from './http/http-types.ts';
+import { CreerCommandeDepuisDomaineUseCase } from './commandes/commande.controller.ts';
+import { PasserCommandeUseCase } from '@belairs-buvette/domain/src/use-cases/place-order.use-case.ts';
+import {
+	InMemoryCommandeRepository,
+	InMemoryStockRepository,
+} from '@belairs-buvette/infrastructure/src/index.ts';
 
 /**
  * Builds the Belair's Buvette backend welcome message.
@@ -31,3 +37,24 @@ export const buildApplication = (deps: {
 		}): Promise<{ commandeId: string; statut: string }>;
 	};
 }): Application => createApplicationRouter(deps);
+
+export const buildApplicationWithInMemoryDependencies = (): Application => {
+	const orderRepository = new InMemoryCommandeRepository();
+	const stockRepository = new InMemoryStockRepository([
+		{
+			id: 'stock-1',
+			name: 'drink-mojito',
+			stock: 25,
+			price: 12,
+		},
+	]);
+	const passerCommandeUseCase = new PasserCommandeUseCase(
+		orderRepository,
+		stockRepository,
+	);
+	const creerCommandeUseCase = new CreerCommandeDepuisDomaineUseCase(
+		passerCommandeUseCase,
+	);
+
+	return buildApplication({ creerCommandeUseCase });
+};
