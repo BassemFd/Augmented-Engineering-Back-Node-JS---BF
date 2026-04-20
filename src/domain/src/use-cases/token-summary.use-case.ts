@@ -2,6 +2,7 @@ export type TokenAmount = { drink: number; food: number };
 
 export interface TokenRepository {
   getTokens(customerId: string): Promise<TokenAmount> | TokenAmount;
+  setTokens(customerId: string, tokens: TokenAmount): void | Promise<void>;
 }
 
 export class TokenSummaryUseCase {
