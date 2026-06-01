@@ -2,6 +2,8 @@
 
 Welcome to the Bel'Air's Buvette project! This document outlines the key features and functionalities of the backend system designed to manage drinks and snacks efficiently.
 
+Implementation tracker: see [FEATURES_IMPLEMENTATION_STATUS.md](FEATURES_IMPLEMENTATION_STATUS.md)
+
 ## Features
 
 ### As a festival goer, i want to consult the remaining balance of my tokens
