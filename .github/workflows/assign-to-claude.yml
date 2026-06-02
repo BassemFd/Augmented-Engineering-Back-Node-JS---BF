@@ -1,0 +1,176 @@
+name: Assign to Claude
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  implement:
+    # Only run when the Assign-to-Claude label is applied
+    if: github.event.label.name == 'Assign-to-Claude'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Configure git identity
+        run: |
+          git config user.name "Claude Code"
+          git config user.email "claude-code[bot]@anthropic.com"
+
+      - name: Create feature branch
+        id: branch
+        run: |
+          BRANCH="claude/issue-${{ github.event.issue.number }}"
+          git checkout -b "$BRANCH"
+          echo "name=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: React to issue (👀)
+        run: |
+          gh issue comment ${{ github.event.issue.number }} \
+            --body "👀 Claude Code is picking up this issue and will open a PR shortly."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch full issue details
+        run: |
+          gh issue view ${{ github.event.issue.number }} \
+            --json number,title,body,labels \
+            > /tmp/issue.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Claude prompt
+        run: |
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+
+          cat > /tmp/claude-prompt.txt << PROMPT_EOF
+          You are implementing a GitHub issue in this repository using the project's TDD agents.
+
+          ## Issue #${ISSUE_NUMBER}
+
+          $(cat /tmp/issue.json)
+
+          ## How to proceed
+
+          The project has three TDD agents that you MUST follow exactly, in order, for each
+          Gherkin scenario listed in the issue body.
+
+          Read these three agent files now — they contain the full instructions, rules, and
+          JSON handoff formats you must respect:
+
+            - .github/agents/TDD Red step.agent.md
+            - .github/agents/TDD Green step.agent.md
+            - .github/agents/TDD Refactor step.agent.md
+
+          Then read the existing use-case files and their tests so you understand the
+          current codebase before writing anything:
+
+            - src/domain/src/use-cases/          (production use cases)
+            - src/domain/use-cases/__tests__/    (test files)
+            - src/domain/src/index.ts            (export index)
+
+          ## Execution plan
+
+          For each Gherkin scenario in the issue (one at a time, in order):
+
+          1. RED   — follow the TDD Red step agent: write exactly one failing test.
+                     Run: pnpm vitest run <test_file> -t "<test_name>"
+                     The test MUST fail. Capture the Red handoff JSON.
+
+          2. GREEN — follow the TDD Green step agent: pass the Red handoff as input.
+                     Make the test pass with the minimum code — inside the test file only (InTest* pattern).
+                     Run: pnpm vitest run <test_file> -t "<test_name>"
+                     Capture the Green handoff JSON.
+
+          3. REFACTOR — follow the TDD Refactor step agent: pass the Green handoff as input.
+                        Move production code out of the test into src/domain/src/use-cases/.
+                        Create the re-export shim at src/domain/use-cases/<feature>.use-case.ts
+                        Add the export to src/domain/src/index.ts
+                        Run micro-step tests after each file move.
+
+          After ALL scenarios are done, run the full suite and verify it is green:
+            pnpm --filter domain test
+
+          Then commit ALL changes:
+            git add src/domain/
+            git commit -m "feat(domain): implement <feature name> (closes #${ISSUE_NUMBER})"
+
+          ## Hard rules (from the agents — do not break these)
+          - RED: never touch production files.
+          - GREEN: never touch production files; use InTest* prefix for temporary stubs.
+          - REFACTOR: micro-step loop only (modify → test → validate → continue).
+          - Never modify the target test's name or assertions.
+          - Do NOT push or open a PR — the CI workflow handles that.
+          PROMPT_EOF
+
+      - name: Run Claude Code (TDD Red → Green → Refactor per scenario)
+        run: claude --dangerously-skip-permissions -p "$(cat /tmp/claude-prompt.txt)"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }} # pragma: allowlist secret
+
+      - name: Verify tests pass
+        run: pnpm --filter domain test
+
+      - name: Push branch
+        run: git push origin "${{ steps.branch.outputs.name }}"
+
+      - name: Open pull request
+        run: |
+          ISSUE_TITLE=$(gh issue view ${{ github.event.issue.number }} --json title --jq '.title')
+          gh pr create \
+            --title "feat: ${ISSUE_TITLE}" \
+            --body "$(cat << 'PR_EOF'
+          ## Summary
+
+          Closes #${{ github.event.issue.number }}
+
+          Implemented autonomously by [Claude Code](https://claude.ai/claude-code).
+
+          ## Checklist
+
+          - [ ] Tests pass (`pnpm --filter domain test`)
+          - [ ] Follows domain use-case conventions
+          - [ ] Given/When/Then test names
+          - [ ] Re-export shim created
+          - [ ] Index export added
+
+          > Review the diff carefully before merging.
+          PR_EOF
+          )" \
+            --base main \
+            --head "${{ steps.branch.outputs.name }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment PR link on issue
+        run: |
+          PR_URL=$(gh pr list --head "${{ steps.branch.outputs.name }}" --json url --jq '.[0].url')
+          gh issue comment ${{ github.event.issue.number }} \
+            --body "✅ PR opened: ${PR_URL}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
