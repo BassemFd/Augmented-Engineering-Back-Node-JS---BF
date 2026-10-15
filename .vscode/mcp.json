@@ -7,7 +7,7 @@
 				"-y",
 				"@upstash/context7-mcp@latest",
 				"--api-key",
-				"ctx7sk-a6a78e8b-b29c-4dc6-aa1d-31776c4000a1"
+				"${input:context7-key}"
 			]
 		},
 		"serena": {
@@ -40,5 +40,12 @@
 			"url": "https://api.githubcopilot.com/mcp/"
 		}
 	},
-	"inputs": []
+	"inputs": [
+		{
+			"type": "promptString",
+			"id": "context7-key",
+			"description": "Context7 API key",
+			"password": true
+		}
+	]
 }
